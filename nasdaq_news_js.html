@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta content="text/html; charset=utf-8" http-equiv="content-type">
+    <title>News Releases JS</title>
+    <script type="text/javascript">
+      //This is your company and language variable
+      // Your Company Choices are: Ballistix, Crucial, Lexar, Micron and Crucial, Micron Consumer Products Group   spaces are +    ex:Micron+and+Crucial
+      // Your Language codes are: DE, EN, FR, JA, ZH, China, Germany, IT, Italy, UK, ZN(simple Chinese)    spaces are +  ex:Lexar+EN 
+      // Currently languages are not working on the IRXML side (03/28/16)
+      var complang = "Crucial";
+      
+      //This section calls in the year to display and if there isn't one set to display the current year
+      if(localStorage.getItem('dispyear') == null){
+        var dispyear = new Date().getFullYear();
+      }else{
+        var dispyear = localStorage.getItem('dispyear');
+      }
+      dispyear = Number(dispyear);
+      // end year variable loading
+      
+      // variable that sets how many years in the past to go
+      localStorage.setItem('yearsago', 5);
+      // end var yearsago
+      var jssrc = "http://apps.shareholder.com/irxml/irxml.aspx?COMPANYID=ABEA-45YXOQ&PIN=762707311&FUNCTION=NewsReleases&NUMBERPERPAGE=1000&PAGE=1&OUTPUT=js2&SUMMARYLENGTH=1000&STARTDATE=1%2F1%2F" + dispyear + "&RELEASETYPE=" + complang + "&ENDDATE=1%2F1%2F" + (dispyear+1);
+      document.write('<script language=\"JavaScript\" src=\"' + jssrc + '\"><\/script>');
+    </script>      
+  </head>
+  <body>
+    <ul id="news">
+      <script type="text/javascript">
+        var length = irxmlnewsreleases.length,
+            element = null;
+
+        //This is the code to create pagination that rolls current to x years in the past. 
+        //This first section calls in the years to go back variable set in the html and if that fails to default to 10.
+        if(localStorage.getItem('yearsago') == null){
+          var yearsago = 10;
+        }else{
+          var yearsago = localStorage.getItem('yearsago');
+        }
+        // end years ago variable loading
+
+        //This creates links to each year at the top of the page.
+        var thisyear = new Date().getFullYear();
+        document.write('<div><p>');
+        for (var i = 0; i < yearsago; i++) {
+          if(dispyear == (thisyear - i)){
+            var pageyrs = (thisyear - i) + ' ';
+          }else{
+            var pageyrs = '<a href="" onclick="localStorage.setItem(\'dispyear\', ' + (thisyear - i) + ')">' + (thisyear - i) + '</a> ';
+          }
+          document.write(pageyrs);  
+        }
+        document.write('</p></div>');
+        // end creating links to years.
+
+        for (var i = 0; i < length; i++) {
+          element = irxmlnewsreleases[i];
+          title = element['title'];
+
+          if(element['subtitle']){subtitle =  element['subtitle'];}else{subtitle = "";}
+          summary = element['summary'];
+          releaseid =  element['releaseid'];
+
+          attachmentfileid = element['attachmentfileid'];
+          attachmentfilekey = element['attachmentfilekey'];
+          attachmentfilename = element['attachmentfilename'];
+
+          pdf_url = 'http://investor.shareholder.com/common/download/download.cfm?CompanyID=ABEA-45YXOQ&FileID=' + attachmentfileid + '&FileKey=' + attachmentfilekey + '&FileName=' + attachmentfilename;
+          pdf_link = '<a href="' + pdf_url + '" target="_blank">PDF</a>'; 
+
+          url_generated = 'http://investors.micron.com/releasedetail.cfm?ReleaseID=' + releaseid;
+          link_generated = '<a href="' + url_generated + '" target="_blank">' + title + '</a>';
+
+          date = element['releasedate'];
+          month = date.getMonth() + 1;
+          month_formatted = ('0' + month).slice(-2);
+          day = date.getDate()
+          day_formatted =  ('0' + day).slice(-2);
+          year = date.getFullYear();
+
+          date_formated = month_formatted + '/' + day_formatted + '/' + year;
+
+          var content = '<div><p>' + date_formated + '</p>' + link_generated + ' - ' + pdf_link + '<p>' + subtitle + '</p></div>';
+          document.write(content);
+        }
+      </script>
+    </ul>
+  </body>
+</html>
